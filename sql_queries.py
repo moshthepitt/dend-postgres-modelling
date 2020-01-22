@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS songs (
   song_id VARCHAR UNIQUE NOT NULL,
   title VARCHAR NOT NULL,
   artist_id VARCHAR NOT NULL,
-  year INT NOT NULL,
+  year INT NULL,
   duration NUMERIC NOT NULL,
   PRIMARY KEY (song_id)
 );
@@ -50,9 +50,9 @@ artist_table_create = """
 CREATE TABLE IF NOT EXISTS artists (
   artist_id VARCHAR UNIQUE NOT NULL,
   name VARCHAR NOT NULL,
-  location VARCHAR NOT NULL,
-  latitude NUMERIC NOT NULL,
-  longitude NUMERIC NOT NULL,
+  location VARCHAR NULL,
+  latitude NUMERIC NULL,
+  longitude NUMERIC NULL,
   PRIMARY KEY (artist_id)
 );
 """
