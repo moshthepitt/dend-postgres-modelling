@@ -1,9 +1,8 @@
 """etl module."""
 import glob
-import json
 import os
 
-# import pandas as pd
+import pandas as pd
 import psycopg2
 
 from sql_queries import artist_table_insert, song_table_insert
@@ -12,41 +11,44 @@ from sql_queries import artist_table_insert, song_table_insert
 def process_song_file(cur, filepath):
     """Process song file and store in DB."""
     # open song file
-    with open(filepath, "r") as file:
-        data = json.load(file)
+    df = pd.read_json(filepath, lines=True)
+    # replace nan with None
+    df = df.where((pd.notnull(df)), None)
+    # replace 0 year with None
+    df.year = df.year.replace({0: None})
 
-        # insert song record
-        song_data = (
-            data["song_id"],
-            data["title"],
-            data["artist_id"],
-            data["year"],
-            data["duration"],
-        )
-        cur.execute(song_table_insert, song_data)
+    # insert song record
+    song_data = df[[
+        'song_id',
+        'title',
+        'artist_id',
+        'year',
+        'duration'
+    ]].values[0]
+    cur.execute(song_table_insert, song_data)
 
-        # insert artist record
-        artist_data = (
-            data["artist_id"],
-            data["artist_name"],
-            data["artist_location"],
-            data["artist_latitude"],
-            data["artist_longitude"],
-        )
-        cur.execute(artist_table_insert, artist_data)
+    # insert artist record
+    artist_data = df[[
+        'artist_id',
+        'artist_name',
+        'artist_location',
+        'artist_latitude',
+        'artist_longitude'
+    ]].values[0]
+    cur.execute(artist_table_insert, artist_data)
 
 
 # def process_log_file(cur, filepath):
 #     # open log file
-#     df =
+#     df = pd.read_json(filepath, lines=True)
 
 #     # filter by NextSong action
-#     df =
+#     df = df.loc[df['page'] == 'NextSong']
 
-#     # convert timestamp column to datetime
+    # convert timestamp column to datetime
 #     t =
 
-#     # insert time data records
+    # insert time data records
 #     time_data =
 #     column_labels =
 #     time_df =
@@ -54,14 +56,14 @@ def process_song_file(cur, filepath):
 #     for i, row in time_df.iterrows():
 #         cur.execute(time_table_insert, list(row))
 
-#     # load user table
+    # load user table
 #     user_df =
 
-#     # insert user records
+    # insert user records
 #     for i, row in user_df.iterrows():
 #         cur.execute(user_table_insert, row)
 
-#     # insert songplay records
+    # insert songplay records
 #     for index, row in df.iterrows():
 
 #         # get songid and artistid from song and artist tables
