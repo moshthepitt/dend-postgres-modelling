@@ -1,3 +1,4 @@
+"""SQL queries module."""
 # DROP TABLES
 
 songplay_table_drop = "DROP TABLE IF EXISTS songplays;"
@@ -79,9 +80,37 @@ user_table_insert = """
 """
 
 song_table_insert = """
+INSERT INTO songs (
+  song_id,
+  title,
+  artist_id,
+  year,
+  duration
+)
+VALUES (%s,%s,%s,%s,%s)
+ON CONFLICT (song_id) DO UPDATE
+SET
+  title=EXCLUDED.title,
+  artist_id=EXCLUDED.artist_id,
+  year=EXCLUDED.year,
+  duration=EXCLUDED.duration;
 """
 
 artist_table_insert = """
+INSERT INTO artists (
+  artist_id,
+  name,
+  location,
+  latitude,
+  longitude
+)
+VALUES (%s,%s,%s,%s,%s)
+ON CONFLICT (artist_id) DO UPDATE
+SET
+  name=EXCLUDED.name,
+  location=EXCLUDED.location,
+  latitude=EXCLUDED.latitude,
+  longitude=EXCLUDED.longitude;
 """
 
 
