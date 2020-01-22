@@ -11,16 +11,16 @@ time_table_drop = "DROP TABLE IF EXISTS time;"
 
 songplay_table_create = """
 CREATE TABLE IF NOT EXISTS songplays (
-  songplay_id SERIAL UNIQUE NOT NULL,
   start_time TIMESTAMP NOT NULL,
   user_id VARCHAR NOT NULL,
   level VARCHAR NOT NULL,
-  song_id VARCHAR NOT NULL,
-  artist_id VARCHAR NOT NULL,
+  song_id VARCHAR NULL,
+  artist_id VARCHAR NULL,
   session_id BIGINT NOT NULL,
   location VARCHAR NOT NULL,
   user_agent VARCHAR NOT NULL,
-  PRIMARY KEY (songplay_id)
+  -- the assumption is that start_time and user_id are unique together
+  PRIMARY KEY (start_time, user_id)
 );
 """
 
@@ -59,24 +59,57 @@ CREATE TABLE IF NOT EXISTS artists (
 
 time_table_create = """
 CREATE TABLE IF NOT EXISTS time (
-  id SERIAL UNIQUE NOT NULL,
   start_time TIMESTAMP NOT NULL,
   hour VARCHAR NOT NULL,
   day VARCHAR NOT NULL,
   week VARCHAR NOT NULL,
   month VARCHAR NOT NULL,
   year INT NOT NULL,
-  weekday VARCHAR NOT NULL,
-  PRIMARY KEY (id)
+  weekday VARCHAR NOT NULL
 );
 """
 
 # INSERT RECORDS
 
 songplay_table_insert = """
+INSERT INTO songplays (
+  start_time,
+  user_id,
+  level,
+  song_id,
+  artist_id,
+  session_id,
+  location,
+  user_agent
+)
+VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+ON CONFLICT (start_time, user_id) DO UPDATE
+SET
+  start_time=EXCLUDED.start_time,
+  user_id=EXCLUDED.user_id,
+  level=EXCLUDED.level,
+  song_id=EXCLUDED.song_id,
+  artist_id=EXCLUDED.artist_id,
+  session_id=EXCLUDED.session_id,
+  location=EXCLUDED.location,
+  user_agent=EXCLUDED.user_agent;
 """
 
 user_table_insert = """
+INSERT INTO users (
+  user_id,
+  first_name,
+  last_name,
+  gender,
+  level
+)
+VALUES (%s,%s,%s,%s,%s)
+ON CONFLICT (user_id) DO UPDATE
+SET
+  first_name=EXCLUDED.first_name,
+  last_name=EXCLUDED.last_name,
+  gender=EXCLUDED.gender,
+  level=EXCLUDED.level;
 """
 
 song_table_insert = """
@@ -115,11 +148,31 @@ SET
 
 
 time_table_insert = """
+INSERT INTO time (
+  start_time,
+  hour,
+  day,
+  week,
+  month,
+  year,
+  weekday
+)
+VALUES (%s,%s,%s,%s,%s,%s,%s);
 """
 
 # FIND SONGS
 
 song_select = """
+SELECT
+  songs.song_id AS song_id,
+  artists.artist_id AS artist_id
+FROM songs
+LEFT JOIN artists
+  ON songs.artist_id = artists.artist_id
+WHERE
+  songs.title = %s
+  AND artists.name = %s
+  AND songs.duration = %s;
 """
 
 # QUERY LISTS
