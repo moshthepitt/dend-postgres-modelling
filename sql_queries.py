@@ -20,7 +20,27 @@ CREATE TABLE IF NOT EXISTS songplays (
   location VARCHAR NOT NULL,
   user_agent VARCHAR NOT NULL,
   -- the assumption is that start_time and user_id are unique together
-  PRIMARY KEY (start_time, user_id)
+  PRIMARY KEY (start_time, user_id),
+  CONSTRAINT fk_songplays_users
+    FOREIGN KEY (user_id)
+    REFERENCES users (user_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_songplays_artists
+    FOREIGN KEY (artist_id)
+    REFERENCES artists (artist_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_songplays_songs
+    FOREIGN KEY (song_id)
+    REFERENCES songs (song_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_songplays_time
+    FOREIGN KEY (start_time)
+    REFERENCES time (start_time)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 """
 
@@ -65,7 +85,8 @@ CREATE TABLE IF NOT EXISTS time (
   week VARCHAR NOT NULL,
   month VARCHAR NOT NULL,
   year INT NOT NULL,
-  weekday VARCHAR NOT NULL
+  weekday VARCHAR NOT NULL,
+  PRIMARY KEY (start_time)
 );
 """
 
@@ -157,7 +178,15 @@ INSERT INTO time (
   year,
   weekday
 )
-VALUES (%s,%s,%s,%s,%s,%s,%s);
+VALUES (%s,%s,%s,%s,%s,%s,%s)
+ON CONFLICT (start_time) DO UPDATE
+SET
+  hour=EXCLUDED.hour,
+  day=EXCLUDED.day,
+  week=EXCLUDED.week,
+  month=EXCLUDED.month,
+  year=EXCLUDED.year,
+  weekday=EXCLUDED.weekday;
 """
 
 # FIND SONGS
@@ -178,16 +207,16 @@ WHERE
 # QUERY LISTS
 
 create_table_queries = [
-    songplay_table_create,
     user_table_create,
     song_table_create,
     artist_table_create,
     time_table_create,
+    songplay_table_create,
 ]
 drop_table_queries = [
-    songplay_table_drop,
     user_table_drop,
     song_table_drop,
     artist_table_drop,
     time_table_drop,
+    songplay_table_drop,
 ]
