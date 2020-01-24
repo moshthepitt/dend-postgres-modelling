@@ -162,3 +162,5 @@ We go through the log_data directory and find all the JSON files.  We then proce
 - etl.py reads and processes files from song_data and log_data and loads them into the database tables.
 - sql_queries.py contains all the sql queries.
 - README.md provides discussion on your project.
+
+This project's python packages are managed by [poetry](https://python-poetry.org/), and poetry uses poetry.lock and pyproject.toml to do that.
