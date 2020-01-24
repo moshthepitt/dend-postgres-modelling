@@ -154,6 +154,30 @@ We go through the log_data directory and find all the JSON files.  We then proce
 - extracts user data and stores it in the users table
 - extracts song play data and stores it in the songplays table
 
+#### How to run the ETL
+
+##### 1. Set up python environment
+
+You can skip these if you already have your Python environment set up.
+
+1. Clone this repo
+2. Create a Python virtualenv
+3. Install [poetry](https://python-poetry.org/)
+4. Run `poetry install`
+
+##### 2. Set up the database
+
+1. Ensure postgres is install
+2. Create a database named `studentdb`
+3. Create a user named `student` with password `student`
+
+##### 3. Run the ETL
+
+1. Run `python create_tables.py`
+2. Run `python etl.py`
+3. ???
+4. Profit (i.e. you are done)
+
 ### Files in this repo
 
 - test.ipynb displays the first few rows of each table to let you check your database.
