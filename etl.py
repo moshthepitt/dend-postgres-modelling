@@ -23,7 +23,6 @@ def process_song_file(cur, filepath):
     df = df.where((pd.notnull(df)), None)
     # replace 0 year with None
     df.year = df.year.replace({0: None})
-
     # insert song record
     song_data = df[["song_id", "title", "artist_id", "year", "duration"]].values[0]  # noqa
     cur.execute(song_table_insert, song_data)
@@ -93,7 +92,12 @@ def process_log_file(cur, filepath):
 
 
 def process_data(cur, conn, filepath, func):
-    """Process all the data."""
+    """
+    Process all the data.
+
+    This function goes through all the log and song files and processes them
+    for storage into the data warehouse.
+    """
     # get all files matching extension from directory
     all_files = []
     for root, dirs, files in os.walk(filepath):
