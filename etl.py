@@ -50,38 +50,45 @@ def process_song_file(cur, filepath):
     cur.execute(artist_table_insert, artist_data)
 
 
-def process_log_file(cur, filepath):
-    """Process and store log file data."""
-    # open log file
-    df = pd.read_json(filepath, lines=True)
-    # replace nan with None
-    df = df.where((pd.notnull(df)), None)
+def store_time_data(cur, time_dataframe):
+    """Store time data.
 
-    # filter by NextSong action
-    df = df.loc[df["page"] == "NextSong"]
-
-    # convert timestamp column to datetime
-    t = pd.to_datetime(df.ts, unit="ms")
-
-    # insert time data records
-    time_data = pd.concat(
-        [t, t.dt.hour, t.dt.day, t.dt.week, t.dt.month, t.dt.year, t.dt.weekday], axis=1  # noqa
-    )
+    Arguments:
+        cur - pycopg2 cursor object
+        time_data - pandas dataframe containing time data
+    """
     column_labels = ["start_time", "hour", "day", "week", "month", "year", "weekday"]  # noqa
-    time_df = pd.DataFrame(data=time_data.values, columns=column_labels)
+    time_df = pd.DataFrame(data=time_dataframe.values, columns=column_labels)
 
     for i, row in time_df.iterrows():
         cur.execute(time_table_insert, list(row))
 
-    # load user table
-    user_df = df[["userId", "firstName", "lastName", "gender", "level"]]
 
+def store_user_data(cur, user_dataframe):
+    """Store user data.
+
+    Arguments:
+        cur - pycopg2 cursor object
+        user_dataframe - pandas dataframe containing user data
+    """
     # insert user records
-    for i, row in user_df.iterrows():
+    for i, row in user_dataframe.iterrows():
         cur.execute(user_table_insert, row)
 
-    # insert songplay records
-    for index, row in df.iterrows():
+
+def store_songplay_data(cur, songplay_dataframe):
+    """Store songplay data.
+
+    This function simply takes in a pandas dataframe containing songplay data,
+    it then extracts songplay data and inserts it into the songplay table using
+    the provided psycopg2 cursor object.
+
+    Arguments:
+        cur - pycopg2 cursor object
+        songplay_dataframe - pandas dataframe containing songplay data
+    """
+    # insert user records
+    for index, row in songplay_dataframe.iterrows():
 
         # get song_id and artist_id from song and artist tables
         results = cur.execute(song_select, (row.song, row.artist, row.length))
@@ -99,6 +106,47 @@ def process_log_file(cur, filepath):
             row.userAgent,
         )
         cur.execute(songplay_table_insert, songplay_data)
+
+
+def process_log_file(cur, filepath):
+    """Process and store log file data.
+
+    This function takes a filepath to a songplay log file and does this:
+        - cleans it by replacing any occurrences of `nan` with None
+        - filters out any records where page != NextSong
+        - converts the timestamp (field name is ts) to a datetime object
+        - extracts hour, day, week, month, year and weekday from timestamp
+        - stores the time information to the time table
+
+    Arguments:
+        cur - pycopg2 cursor object
+        filepath - the filepath to the log file
+    """
+    # open log file
+    df = pd.read_json(filepath, lines=True)
+    # replace nan with None
+    df = df.where((pd.notnull(df)), None)
+
+    # filter by NextSong action
+    df = df.loc[df["page"] == "NextSong"]
+
+    # convert timestamp column to datetime
+    t = pd.to_datetime(df.ts, unit="ms")
+
+    # insert time data records
+    time_data = pd.concat(
+        [t, t.dt.hour, t.dt.day, t.dt.week, t.dt.month, t.dt.year, t.dt.weekday], axis=1  # noqa
+    )
+    store_time_data(cur, time_data)
+
+    # load user table
+    user_df = df[["userId", "firstName", "lastName", "gender", "level"]]
+
+    # insert user records
+    store_user_data(cur, user_df)
+
+    # insert songplay records
+    store_songplay_data(cur, df)
 
 
 def process_data(cur, conn, filepath, func):
@@ -127,7 +175,10 @@ def process_data(cur, conn, filepath, func):
 
 
 def main():
-    """Run main."""
+    """Run main.
+
+    When this is run, the Python code in this module is executed
+    """
     conn = psycopg2.connect(
         "host=127.0.0.1 dbname=sparkifydb user=student password=student"
     )
