@@ -101,7 +101,8 @@ INSERT INTO songplays (
   artist_id,
   session_id,
   location,
-  user_agent
+  user_agent,
+  PRIMARY KEY (start_time, user_id)
 )
 VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
 ON CONFLICT (start_time, user_id) DO UPDATE
