@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS songplays (
 
 user_table_create = """
 CREATE TABLE IF NOT EXISTS users (
-  user_id  VARCHAR UNIQUE NOT NULL,
+  user_id VARCHAR,
   first_name VARCHAR NOT NULL,
   last_name VARCHAR NOT NULL,
   gender VARCHAR NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 song_table_create = """
 CREATE TABLE IF NOT EXISTS songs (
-  song_id VARCHAR UNIQUE NOT NULL,
+  song_id VARCHAR,
   title VARCHAR NOT NULL,
   artist_id VARCHAR NOT NULL,
   year INT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS songs (
 
 artist_table_create = """
 CREATE TABLE IF NOT EXISTS artists (
-  artist_id VARCHAR UNIQUE NOT NULL,
+  artist_id VARCHAR,
   name VARCHAR NOT NULL,
   location VARCHAR NULL,
   latitude NUMERIC NULL,
