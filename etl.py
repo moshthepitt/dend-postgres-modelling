@@ -16,7 +16,17 @@ from sql_queries import (
 
 
 def process_song_file(cur, filepath):
-    """Process song file and store in DB."""
+    """Process song file and store in DB.
+
+    This function takes a song's filepath and does:
+        - cleans it by replacing any occurrences of `nan` with None
+        - replacing instances where year=0 with year=None
+        - inserts it into the artist table
+
+    Arguments:
+        cur - pycopg2 cursor object
+        filepath - the filepath to the song file
+    """
     # open song file
     df = pd.read_json(filepath, lines=True)
     # replace nan with None
